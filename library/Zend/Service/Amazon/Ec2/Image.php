@@ -104,8 +104,6 @@ class Zend_Service_Amazon_Ec2_Image extends Zend_Service_Amazon_Ec2_Abstract
         $xpath  = $response->getXPath();
         $nodes = $xpath->query('//ec2:imagesSet/ec2:item');
 
-        print $nodes->length;
-
         $return = array();
         foreach ($nodes as $node) {
             $item = array();

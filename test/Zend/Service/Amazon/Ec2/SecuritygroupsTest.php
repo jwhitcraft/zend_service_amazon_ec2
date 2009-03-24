@@ -159,7 +159,7 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
     /**
      * Tests Zend_Service_Amazon_Ec2_Securitygroups->describe()
      */
-    public function testDescribe()
+    public function testDescribeMultipleSecruityGroups()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -212,7 +212,7 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
                     . "</DescribeSecurityGroupsResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->describe();
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->describe(array('WebServers','RangedPortsBySource'));
 
         $this->assertEquals(2, count($return));
 
@@ -236,6 +236,63 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
                         'ipProtocol' => 'tcp',
                         'fromPort'  => '6000',
                         'toPort'    => '7000',
+                        'ipRanges'  => '0.0.0.0/0'
+                    ))
+                )
+            );
+        foreach($return as $k => $r) {
+            $this->assertSame($arrGroups[$k], $r);
+        }
+    }
+
+    public function testDescribeSingleSecruityGroup()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeSecurityGroupsResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <securityGroupInfo>\r\n"
+                    . "    <item>\r\n"
+                    . "      <ownerId>UYY3TLBUXIEON5NQVUUX6OMPWBZIQNFM</ownerId>\r\n"
+                    . "      <groupName>WebServers</groupName>\r\n"
+                    . "      <groupDescription>Web</groupDescription>\r\n"
+                    . "      <ipPermissions>\r\n"
+                    . "        <item>\r\n"
+                    . "       <ipProtocol>tcp</ipProtocol>\r\n"
+                    . "   <fromPort>80</fromPort>\r\n"
+                    . "   <toPort>80</toPort>\r\n"
+                    . "   <groups/>\r\n"
+                    . "   <ipRanges>\r\n"
+                    . "     <item>\r\n"
+                    . "       <cidrIp>0.0.0.0/0</cidrIp>\r\n"
+                    . "     </item>\r\n"
+                    . "   </ipRanges>\r\n"
+                    . "         </item>\r\n"
+                    . "      </ipPermissions>\r\n"
+                    . "    </item>\r\n"
+                    . "  </securityGroupInfo>\r\n"
+                    . "</DescribeSecurityGroupsResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->describe('WebServers');
+
+        $this->assertEquals(1, count($return));
+
+        $arrGroups = array(
+                array(
+                    'ownerId'   => 'UYY3TLBUXIEON5NQVUUX6OMPWBZIQNFM',
+                    'groupName' => 'WebServers',
+                    'groupDescription' => 'Web',
+                    'ipPermissions' => array(0 => array(
+                        'ipProtocol' => 'tcp',
+                        'fromPort'  => '80',
+                        'toPort'    => '80',
                         'ipRanges'  => '0.0.0.0/0'
                     ))
                 )

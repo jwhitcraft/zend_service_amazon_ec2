@@ -105,7 +105,7 @@ class InstanceTest extends PHPUnit_Framework_TestCase
     /**
      * Tests Zend_Service_Amazon_Ec2_Instance->describe()
      */
-    public function testDescribe()
+    public function testDescribeSingleInstance()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -167,7 +167,7 @@ class InstanceTest extends PHPUnit_Framework_TestCase
     /**
      * Tests Zend_Service_Amazon_Ec2_Instance->run()
      */
-    public function testRun()
+    public function testRunOneSecurityGroup()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -242,7 +242,7 @@ class InstanceTest extends PHPUnit_Framework_TestCase
                     . "</RunInstancesResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Instance->run('ami-60a54009', 1, 3, "example-key-name", "default", null, 'm1.small', 'us-east-1b');
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->run('ami-60a54009', 1, 3, "example-key-name", "default", "instance_id=www3", 'm1.small', 'us-east-1b', 'aki-4438dd2d', 'ari-4538dd2c', 'vertdevice', '/dev/sdv');
 
         $this->assertEquals(3, count($return['instances']));
         $this->assertEquals('495219933132', $return['ownerId']);
@@ -254,6 +254,60 @@ class InstanceTest extends PHPUnit_Framework_TestCase
             $this->assertEquals($k, $r['amiLaunchIndex']);
         }
 
+    }
+
+/**
+     * Tests Zend_Service_Amazon_Ec2_Instance->run()
+     */
+    public function testRunMultipleSecurityGroups()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<RunInstancesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <reservationId>r-47a5402e</reservationId>\r\n"
+                    . "  <ownerId>495219933132</ownerId>\r\n"
+                    . "  <groupSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <groupId>default</groupId>\r\n"
+                    . "    </item>\r\n"
+                    . "    <item>\r\n"
+                    . "      <groupId>web</groupId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </groupSet>\r\n"
+                    . "  <instancesSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <instanceId>i-2ba64342</instanceId>\r\n"
+                    . "      <imageId>ami-60a54009</imageId>\r\n"
+                    . "      <instanceState>\r\n"
+                    . "        <code>0</code>\r\n"
+                    . "        <name>pending</name>\r\n"
+                    . "      </instanceState>\r\n"
+                    . "      <privateDnsName></privateDnsName>\r\n"
+                    . "      <dnsName></dnsName>\r\n"
+                    . "      <keyName>example-key-name</keyName>\r\n"
+                    . "       <amiLaunchIndex>0</amiLaunchIndex>\r\n"
+                    . "      <InstanceType>m1.small</InstanceType>\r\n"
+                    . "      <launchTime>2007-08-07T11:51:50.000Z</launchTime>\r\n"
+                    . "      <placement>\r\n"
+                    . "        <availabilityZone>us-east-1b</availabilityZone>\r\n"
+                    . "      </placement>\r\n"
+                    . "    </item>\r\n"
+                    . "  </instancesSet>\r\n"
+                    . "</RunInstancesResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->run('ami-60a54009', 1, 3, 'example-key-name', array('default','web'), 'instance_id=www3', 'm1.small', 'us-east-1b', 'aki-4438dd2d', 'ari-4538dd2c', 'vertdevice', '/dev/sdv');
+
+        $arrGroups = array('default', 'web');
+
+        $this->assertSame($arrGroups, $return['groupSet']);
     }
 
     public function testTerminateSingleInstances()
@@ -284,14 +338,12 @@ class InstanceTest extends PHPUnit_Framework_TestCase
                     . "</TerminateInstancesResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $arrInstanceIds = array('i-28a64341');
-
-        $return = $this->Zend_Service_Amazon_Ec2_Instance->terminate($arrInstanceIds);
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->terminate('i-28a64341');
 
         $this->assertEquals(1, count($return));
 
-        foreach($return as $k=>$r) {
-            $this->assertEquals($arrInstanceIds[$k], $r['instanceId']);
+        foreach($return as $r) {
+            $this->assertEquals('i-28a64341', $r['instanceId']);
         }
     }
 
