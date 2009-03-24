@@ -213,6 +213,7 @@ class Zend_Service_Amazon_Ec2_Image extends Zend_Service_Amazon_Ec2_Abstract
                 $parmas['ProductCode.1'] = $productCode;
                 break;
             default:
+                require_once 'Zend/Service/Amazon/Ec2/Exception.php';
                 throw new Zend_Service_Amazon_Ec2_Exception('Invalid Attribute Passed In.  Valid Image Attributes are launchPermission and productCode.');
                 break;
         }

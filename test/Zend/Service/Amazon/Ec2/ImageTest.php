@@ -177,7 +177,7 @@ class ImageTest extends PHPUnit_Framework_TestCase
     /**
      * Tests Zend_Service_Amazon_Ec2_Image->modifyAttribute()
      */
-    public function testModifyAttributeLaunchPermission()
+    public function testModifyAttributeSingleLaunchPermission()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -194,9 +194,35 @@ class ImageTest extends PHPUnit_Framework_TestCase
         $this->adapter->setResponse($rawHttpResponse);
 
         $return = $this->Zend_Service_Amazon_Ec2_Image->modifyAttribute('ami-61a54008', 'launchPermission', 'add', '495219933132', 'all');
-
         $this->assertTrue($return);
+    }
 
+    public function testModifyAttributeMultipleLaunchPermission()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<ModifyImageAttributeResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <return>true</return>\r\n"
+                    . "</ModifyImageAttributeResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Image->modifyAttribute('ami-61a54008', 'launchPermission', 'add', array('495219933132', '495219933133'), array('all', 'all'));
+        $this->assertTrue($return);
+    }
+
+    public function testModifyAttributeThrowsExceptionOnInvalidAttribute()
+    {
+        try {
+            $return = $this->Zend_Service_Amazon_Ec2_Image->modifyAttribute('ami-61a54008', 'invalidPermission', 'add', '495219933132', 'all');
+            $this->fail('An exception should be throw if you are modifying an invalid attirubte');
+        } catch (Zend_Service_Amazon_Ec2_Exception $zsaee) {}
     }
 
     public function testModifyAttributeProuctCodes()
