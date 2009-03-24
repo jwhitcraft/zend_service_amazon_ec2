@@ -49,8 +49,8 @@ class Zend_Service_Amazon_Ec2_Elasticip extends Zend_Service_Amazon_Ec2_Abstract
         $return = array();
         foreach ($nodes as $k => $node) {
             $item = array();
-            $item['instanceId']   = $xpath->evaluate('string(//ec2:instanceId/text())', $node);
-            $item['publicIp']  = $xpath->evaluate('string(//ec2:publicIp/text())', $node);
+            $item['publicIp']  = $xpath->evaluate('string(ec2:publicIp/text())', $node);
+            $item['instanceId']   = $xpath->evaluate('string(ec2:instanceId/text())', $node);
 
             $return[] = $item;
             unset($item);

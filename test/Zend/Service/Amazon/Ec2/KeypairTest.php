@@ -57,6 +57,15 @@ class KeypairTest extends PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
+    public function testCreateKeyPairNoNameThrowsException()
+    {
+        try {
+            $this->Zend_Service_Amazon_Ec2_Keypair->create('');
+            $this->fail('An exception should be thrown if an empty keyname is passed in.');
+        } catch (Zend_Service_Amazon_Ec2_Exception $zsaee) {
+        }
+    }
+
     /**
      * Tests Zend_Service_Amazon_Ec2_Keypair->create()
      */
@@ -109,7 +118,7 @@ class KeypairTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('1f:51:ae:28:bf:89:e9:d8:1f:25:5d:37:2d:7d:b8:ca:9f:f5:f1:6f', $response['keyFingerprint']);
     }
 
-    public function testDescribeKeyPair()
+    public function testDescribeSingleKeyPair()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -133,6 +142,59 @@ class KeypairTest extends PHPUnit_Framework_TestCase
 
         $response = $this->Zend_Service_Amazon_Ec2_Keypair->describe('example-key-name');
         $this->assertEquals('example-key-name', $response[0]['keyName']);
+    }
+
+    public function testDescribeMultipleKeyPair()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+                    . "<DescribeKeyPairsResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <keySet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <keyName>example-key-name</keyName>\r\n"
+                    . "      <keyFingerprint>1f:51:ae:28:bf:89:e9:d8:1f:25:5d:37:2d:7d:b8:ca:9f:f5:f1:6f</keyFingerprint>\r\n"
+                    . "    </item>\r\n"
+                    . "    <item>\r\n"
+                    . "      <keyName>zend-test-key</keyName>\r\n"
+                    . "      <keyFingerprint>25:5d:37:2d:7d:b8:ca:9f:f5:f1:6f:1f:51:ae:28:bf:89:e9:d8:1f</keyFingerprint>\r\n"
+                    . "    </item>\r\n"
+                    . "  </keySet>\r\n"
+                    . "</DescribeKeyPairsResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $response = $this->Zend_Service_Amazon_Ec2_Keypair->describe(array('example-key-name', 'zend-test-key'));
+
+        $arrKeys = array(
+            array(
+                'keyName'       => 'example-key-name',
+                'keyFingerprint'=> '1f:51:ae:28:bf:89:e9:d8:1f:25:5d:37:2d:7d:b8:ca:9f:f5:f1:6f'
+            ),
+            array(
+                'keyName'       => 'zend-test-key',
+                'keyFingerprint'=> '25:5d:37:2d:7d:b8:ca:9f:f5:f1:6f:1f:51:ae:28:bf:89:e9:d8:1f'
+            )
+        );
+
+        foreach($response as $k => $r) {
+            $this->assertSame($arrKeys[$k], $r);
+        }
+    }
+
+    public function testDeleteKeyPairNoNameThrowsException()
+    {
+        try {
+            $this->Zend_Service_Amazon_Ec2_Keypair->delete('');
+            $this->fail('An exception should be thrown if an empty keyname is passed in.');
+        } catch (Zend_Service_Amazon_Ec2_Exception $zsaee) {
+        }
     }
 
     public function testDeleteFailsOnNonValidKey()

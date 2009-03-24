@@ -19,6 +19,7 @@ class Zend_Service_Amazon_Ec2_Keypair extends Zend_Service_Amazon_Ec2_Abstract
         $params['Action'] = 'CreateKeyPair';
 
         if(!$keyName) {
+            require_once 'Zend/Service/Amazon/Ec2/Exception.php';
             throw new Zend_Service_Amazon_Ec2_Exception('Invalid Key Name');
         }
 
@@ -59,14 +60,13 @@ class Zend_Service_Amazon_Ec2_Keypair extends Zend_Service_Amazon_Ec2_Abstract
         $response = $this->sendRequest($params);
         $xpath = $response->getXPath();
 
-        $nodes  = $xpath->query('//ec2:item');
+        $nodes  = $xpath->query('//ec2:keySet/ec2:item');
 
         $return = array();
         foreach ($nodes as $k => $node) {
             $item = array();
-            $item['keyName']          = $xpath->evaluate('string(//ec2:keyName/text())', $node);
-            $item['keyFingerprint']   = $xpath->evaluate('string(//ec2:keyFingerprint/text())', $node);
-            $item['keyMaterial']      = $xpath->evaluate('string(//ec2:keyMaterial/text())', $node);
+            $item['keyName']          = $xpath->evaluate('string(ec2:keyName/text())', $node);
+            $item['keyFingerprint']   = $xpath->evaluate('string(ec2:keyFingerprint/text())', $node);
 
             $return[] = $item;
             unset($item);
@@ -89,6 +89,7 @@ class Zend_Service_Amazon_Ec2_Keypair extends Zend_Service_Amazon_Ec2_Abstract
         $params['Action'] = 'DeleteKeyPair';
 
         if(!$keyName) {
+            require_once 'Zend/Service/Amazon/Ec2/Exception.php';
             throw new Zend_Service_Amazon_Ec2_Exception('Invalid Key Name');
         }
 

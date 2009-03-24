@@ -156,7 +156,7 @@ class Zend_Service_Amazon_Ec2_Ebs extends Zend_Service_Amazon_Ec2_Abstract
         $return['instanceId']   = $xpath->evaluate('string(//ec2:instanceId/text())');
         $return['device']       = $xpath->evaluate('string(//ec2:device/text())');
         $return['status']       = $xpath->evaluate('string(//ec2:status/text())');
-        $return['attachTime']   = $xpath->evaluate('string(//ec2:attachTime/text()');
+        $return['attachTime']   = $xpath->evaluate('string(//ec2:attachTime/text())');
 
         return $return;
     }
@@ -202,8 +202,8 @@ class Zend_Service_Amazon_Ec2_Ebs extends Zend_Service_Amazon_Ec2_Abstract
         $return['snapshotId']   = $xpath->evaluate('string(//ec2:snapshotId/text())');
         $return['volumeId']     = $xpath->evaluate('string(//ec2:volumeId/text())');
         $return['status']       = $xpath->evaluate('string(//ec2:status/text())');
-        $return['startTime']    = $xpath->evaluate('string(//ec2:startTime/text()');
-        $return['progress']     = $xpath->evaluate('string(//ec2:progress/text()');
+        $return['startTime']    = $xpath->evaluate('string(//ec2:startTime/text())');
+        $return['progress']     = $xpath->evaluate('string(//ec2:progress/text())');
 
         return $return;
     }

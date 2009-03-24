@@ -125,10 +125,55 @@ class ElasticipTest extends PHPUnit_Framework_TestCase
 
         $response = $this->Zend_Service_Amazon_Ec2_Elasticip->describe('67.202.55.255');
 
-        $this->assertEquals('67.202.55.255', $response[0]['publicIp']);
-        $this->assertEquals('i-ag8ga0a', $response[0]['instanceId']);
+        $arrIp = array(
+            'publicIp'      => '67.202.55.255',
+            'instanceId'    => 'i-ag8ga0a'
+        );
 
+        $this->assertSame($arrIp, $response[0]);
+    }
 
+    public function testDescribeMultipleElasticIp()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeAddressesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <addressSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <publicIp>67.202.55.255</publicIp>\r\n"
+                    . "      <instanceId>i-ag8ga0a</instanceId>\r\n"
+                    . "    </item>\r\n"
+                    . "    <item>\r\n"
+                    . "      <publicIp>67.202.55.200</publicIp>\r\n"
+                    . "      <instanceId>i-aauoi9g</instanceId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </addressSet>\r\n"
+                    . "</DescribeAddressesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $response = $this->Zend_Service_Amazon_Ec2_Elasticip->describe(array('67.202.55.255', '67.202.55.200'));
+
+        $arrIps = array(
+            array(
+                'publicIp'      => '67.202.55.255',
+                'instanceId'    => 'i-ag8ga0a'
+            ),
+            array(
+                'publicIp'      => '67.202.55.200',
+                'instanceId'    => 'i-aauoi9g'
+            )
+        );
+
+        foreach($response as $k => $r) {
+            $this->assertSame($arrIps[$k], $r);
+        }
     }
 
     /**
