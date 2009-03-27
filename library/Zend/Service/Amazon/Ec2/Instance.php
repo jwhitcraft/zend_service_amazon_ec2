@@ -4,6 +4,31 @@ require_once 'Zend/Service/Amazon/Ec2/Abstract.php';
 
 class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
 {
+    /**
+     * Constant for Small Instance TYpe
+     */
+    const SMALL = 'm1.small';
+
+    /**
+     * Constant for Large Instance TYpe
+     */
+    const LARGE = 'm1.large';
+
+    /**
+     * Constant for X-Large Instance TYpe
+     */
+    const XLARGE = 'm1.xlarge';
+
+    /**
+     * Constant for High CPU Medium Instance TYpe
+     */
+    const HCPU_MEDIUM = 'c1.medium';
+
+    /**
+     * Constant for High CPU X-Large Instance TYpe
+     */
+    const HCPU_XLARGE = 'c1.xlarge';
+
 
     /**
      * Launches a specified number of Instances.
@@ -245,6 +270,63 @@ class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
             $return[] = $item;
             unset($item);
         }
+
+        return $return;
+    }
+
+    /**
+     * Requests a reboot of one or more instances.
+     *
+     * This operation is asynchronous; it only queues a request to reboot the specified instance(s). The operation
+     * will succeed if the instances are valid and belong to the user. Requests to reboot terminated instances are ignored.
+     *
+     * @param string|array $instanceId  One or more instance IDs.
+     * @return boolean
+     */
+    public function reboot($instanceId)
+    {
+        $params = array();
+        $params['Action'] = 'RebootInstances';
+
+        if(is_array($instanceId) && !empty($instanceId)) {
+            foreach($instanceId as $k=>$name) {
+                $params['InstanceId.' . ($k+1)] = $name;
+            }
+        } elseif($instanceId) {
+            $params['InstanceId.1'] = $instanceId;
+        }
+
+        $response = $this->sendRequest($params);
+        $xpath = $response->getXPath();
+
+        $return = $xpath->evaluate('string(//ec2:return/text())');
+
+        return ($return === "true");
+    }
+
+    /**
+     * Retrieves console output for the specified instance.
+     *
+     * Instance console output is buffered and posted shortly after instance boot, reboot, and termination.
+     * Amazon EC2 preserves the most recent 64 KB output which will be available for at least one hour after the most recent post.
+     *
+     * @param string $instanceId       An instance ID
+     * @return array
+     */
+    public function consoleOutput($instanceId)
+    {
+        $params = array();
+        $params['Action'] = 'GetConsoleOutput';
+        $params['InstanceId'] = $instanceId;
+
+        $response = $this->sendRequest($params);
+        $xpath = $response->getXPath();
+
+        $return = array();
+
+        $return['instanceId'] = $xpath->evaluate('string(//ec2:instanceId/text())');
+        $return['timestamp'] = $xpath->evaluate('string(//ec2:timestamp/text())');
+        $return['output'] = base64_decode($xpath->evaluate('string(//ec2:output/text())'));
 
         return $return;
     }

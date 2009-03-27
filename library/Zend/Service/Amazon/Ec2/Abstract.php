@@ -35,7 +35,7 @@ abstract class Zend_Service_Amazon_Ec2_Abstract extends Zend_Service_Amazon_Abst
      */
     protected function sendRequest(array $params = array())
     {
-        $url = 'http://' . self::EC2_ENDPOINT . '/';
+        $url = 'https://' . self::EC2_ENDPOINT . '/';
 
         $params = $this->addRequiredParameters($params);
 
