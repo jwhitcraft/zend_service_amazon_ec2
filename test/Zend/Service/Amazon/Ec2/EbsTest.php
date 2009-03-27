@@ -117,7 +117,7 @@ class EbsTest extends PHPUnit_Framework_TestCase
     /**
      * Tests Zend_Service_Amazon_Ec2_Ebs->createVolume()
      */
-    public function testCreateVolume()
+    public function testCreateNewVolume()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -138,7 +138,7 @@ class EbsTest extends PHPUnit_Framework_TestCase
                     . "</CreateVolumeResponse>";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Ebs->createVolume(400, 'us-east-1a');
+        $return = $this->Zend_Service_Amazon_Ec2_Ebs->createNewVolume(400, 'us-east-1a');
 
         $this->assertEquals('400', $return['size']);
         $this->assertEquals('vol-4d826724', $return['volumeId']);
@@ -167,7 +167,7 @@ class EbsTest extends PHPUnit_Framework_TestCase
                     . "</CreateVolumeResponse>";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Ebs->createVolume(400, 'us-east-1a', 'snap-78a54011');
+        $return = $this->Zend_Service_Amazon_Ec2_Ebs->createVolumeFromSnapshot('snap-78a54011', 'us-east-1a');
 
         $this->assertEquals('400', $return['size']);
         $this->assertEquals('vol-4d826724', $return['volumeId']);

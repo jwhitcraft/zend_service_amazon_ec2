@@ -10,22 +10,47 @@ class Zend_Service_Amazon_Ec2_Ebs extends Zend_Service_Amazon_Ec2_Abstract
      * You must specify an availability zone when creating a volume. The volume and
      * any instance to which it attaches must be in the same availability zone.
      *
-     * @param string $availabilityZone      The availability zone in which to create the new volume.
      * @param string $size                  The size of the volume, in GiB.
-     * @param string $snapshotId            The snapshot from which to create the new volume.
+     * @param string $availabilityZone      The availability zone in which to create the new volume.
      * @return array
      */
-    public function createVolume($availabilityZone, $size = 0, $snapshotId = null)
+    public function createNewVolume($size, $availabilityZone)
     {
         $params = array();
         $params['Action'] = 'CreateVolume';
         $params['AvailabilityZone'] = $availabilityZone;
+        $params['Size'] = $size;
 
-        if(empty($snapshotId)) {
-            $params['Size'] = $size;
-        } else {
-            $params['SnapshotId'] = $snapshotId;
-        }
+        $response = $this->sendRequest($params);
+        $xpath = $response->getXPath();
+
+        $return = array();
+        $return['volumeId']             = $xpath->evaluate('string(//ec2:volumeId/text())');
+        $return['size']                 = $xpath->evaluate('string(//ec2:size/text())');
+        $return['status']               = $xpath->evaluate('string(//ec2:status/text())');
+        $return['createTime']           = $xpath->evaluate('string(//ec2:createTime/text())');
+        $return['availabilityZone']     = $xpath->evaluate('string(//ec2:availabilityZone/text())');
+        $return['snapshotId']           = $xpath->evaluate('string(//ec2:snapshotId/text())');
+
+        return $return;
+    }
+
+    /**
+     * Creates a new Amazon EBS volume that you can mount from any Amazon EC2 instance.
+     *
+     * You must specify an availability zone when creating a volume. The volume and
+     * any instance to which it attaches must be in the same availability zone.
+     *
+     * @param string $snapshotId            The snapshot from which to create the new volume.
+     * @param string $availabilityZone      The availability zone in which to create the new volume.
+     * @return array
+     */
+    public function createVolumeFromSnapshot($snapshotId, $availabilityZone)
+    {
+        $params = array();
+        $params['Action'] = 'CreateVolume';
+        $params['AvailabilityZone'] = $availabilityZone;
+        $params['SnapshotId'] = $snapshotId;
 
         $response = $this->sendRequest($params);
         $xpath = $response->getXPath();
