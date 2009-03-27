@@ -397,5 +397,96 @@ class InstanceTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    public function testRebootMultipleInstances()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<RebootInstancesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <return>true</return>\r\n"
+                    . "</RebootInstancesResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $arrInstanceIds = array('i-28a64341', 'i-21a64348');
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->reboot($arrInstanceIds);
+
+        $this->assertTrue($return);
+    }
+
+    public function testRebootSingleInstance()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<RebootInstancesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <return>true</return>\r\n"
+                    . "</RebootInstancesResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->reboot('i-28a64341');
+
+        $this->assertTrue($return);
+    }
+
+    public function testGetConsoleOutput()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<GetConsoleOutputResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <instanceId>i-28a64341</instanceId>\r\n"
+                    . "  <timestamp>2007-01-03 15:00:00</timestamp>\r\n"
+                    . "  <output>TGludXggdmVyc2lvbiAyLjYuMTYteGVuVSAoYnVpbGRlckBwYXRjaGJhdC5hbWF6b25zYSkgKGdj\r\n"
+. "YyB2ZXJzaW9uIDQuMC4xIDIwMDUwNzI3IChSZWQgSGF0IDQuMC4xLTUpKSAjMSBTTVAgVGh1IE9j\r\n"
+. "dCAyNiAwODo0MToyNiBTQVNUIDIwMDYKQklPUy1wcm92aWRlZCBwaHlzaWNhbCBSQU0gbWFwOgpY\r\n"
+. "ZW46IDAwMDAwMDAwMDAwMDAwMDAgLSAwMDAwMDAwMDZhNDAwMDAwICh1c2FibGUpCjk4ME1CIEhJ\r\n"
+. "R0hNRU0gYXZhaWxhYmxlLgo3MjdNQiBMT1dNRU0gYXZhaWxhYmxlLgpOWCAoRXhlY3V0ZSBEaXNh\r\n"
+. "YmxlKSBwcm90ZWN0aW9uOiBhY3RpdmUKSVJRIGxvY2t1cCBkZXRlY3Rpb24gZGlzYWJsZWQKQnVp\r\n"
+. "bHQgMSB6b25lbGlzdHMKS2VybmVsIGNvbW1hbmQgbGluZTogcm9vdD0vZGV2L3NkYTEgcm8gNApF\r\n"
+. "bmFibGluZyBmYXN0IEZQVSBzYXZlIGFuZCByZXN0b3JlLi4uIGRvbmUuCg==</output>\r\n"
+                    . "</GetConsoleOutputResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->consoleOutput('i-28a64341');
+
+        $arrOutput = array(
+            'instanceId'    => 'i-28a64341',
+            'timestamp'     => '2007-01-03 15:00:00',
+            'output'        => "Linux version 2.6.16-xenU (builder@patchbat.amazonsa) (gcc version 4.0.1 20050727 (Red Hat 4.0.1-5)) #1 SMP Thu Oct 26 08:41:26 SAST 2006\n"
+. "BIOS-provided physical RAM map:\n"
+. "Xen: 0000000000000000 - 000000006a400000 (usable)\n"
+. "980MB HIGHMEM available.\n"
+. "727MB LOWMEM available.\n"
+. "NX (Execute Disable) protection: active\n"
+. "IRQ lockup detection disabled\n"
+. "Built 1 zonelists\n"
+. "Kernel command line: root=/dev/sda1 ro 4\n"
+. "Enabling fast FPU save and restore... done.\n");
+
+        var_dump($arrOutput);
+
+        var_dump($return);
+
+        $this->assertSame($arrOutput, $return);
+    }
+
 }
 
