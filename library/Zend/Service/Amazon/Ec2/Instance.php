@@ -54,66 +54,81 @@ class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
      *
      * Launching public images without a key pair ID will leave them inaccessible.
      *
-     * @param string $imageId                       ID of the AMI with which to launch instances.
-     * @param integer $minCount                     Minimum number of instances to launch.
-     * @param integer $maxCount                     Maximum number of instances to launch.
-     * @param string $keyName                       Name of the key pair with which to launch instances.
-     * @param string|array $securityGroup           Names of the security groups with which to associate the instances.
-     * @param string $userData                      The user data available to the launched instances. This should not be
-     *                                              Base64 encoded.
-     * @param string $instanceType                  Specifies the instance type.
-     *                                              Options include m1.small, m1.large, m1.xlarge, c1.medium, and c1.xlarge.
-     *                                              The default value is m1.small.
-     * @param string $placement                     Specifies the availability zone in which to launch the instance(s).
-     *                                              By default, Amazon EC2 selects an availability zone for you.
-     * @param string $kernelId                      The ID of the kernel with which to launch the instance.
-     * @param string $ramdiskId                     The ID of the RAM disk with which to launch the instance.
-     * @param string $blockDeviceVirtualName        Specifies the virtual name to map to the corresponding device name. For example: instancestore0
-     * @param string $blockDeviceName               Specifies the device to which you are mapping a virtual name. For example: sdb
+     * @param array $options                        An array that contins the options to start an instance.
+     *                                              Required Values:
+     *                                                imageId string        ID of the AMI with which to launch instances.
+     *                                              Optional Values:
+     *                                                minCount integer      Minimum number of instances to launch.
+     *                                                maxCount integer      Maximum number of instances to launch.
+     *                                                keyName string        Name of the key pair with which to launch instances.
+     *                                                securityGruop string|array Names of the security groups with which to associate the instances.
+     *                                                userData string       The user data available to the launched instances. This should not be Base64 encoded.
+     *                                                instanceType constant Specifies the instance type.
+     *                                                placement string      Specifies the availability zone in which to launch the instance(s). By default, Amazon EC2 selects an availability zone for you.
+     *                                                kernelId string       The ID of the kernel with which to launch the instance.
+     *                                                ramdiskId string      The ID of the RAM disk with which to launch the instance.
+     *                                                blockDeviceVirtualName string     Specifies the virtual name to map to the corresponding device name. For example: instancestore0
+     *                                                blockDeviceName string            Specifies the device to which you are mapping a virtual name. For example: sdb
+     * @return array
      */
-    public function run($imageId, $minCount = 1, $maxCount = 1, $keyName = null, $securityGroup = null, $userData = null, $instanceType = 'm1.small', $placement = null, $kernelId = null, $ramdiskId = null, $blockDeviceVirtualName = null, $blockDeviceName = null)
+    public function run(array $options)
     {
+        $_defaultOptions = array(
+            'minCount'  => 1,
+            'maxCount'  => 1,
+            'instanceType' => Zend_Service_Amazon_Ec2_Instance::SMALL
+        );
+
+        // set / override the defualt optoins if they are not passed into the array;
+        $options = array_merge($_defaultOptions, $options);
+
+        if(!$options['imageId']) {
+            require_once 'Zend/Service/Amazon/Ec2/Exception.php';
+            throw new Zend_Service_Amazon_Ec2_Exception('No Image Id Privided');
+        }
+
+
         $params = array();
         $params['Action'] = 'RunInstances';
-        $params['ImageId'] = $imageId;
-        $params['MinCount'] = $minCount;
-        $params['MaxCount'] = $maxCount;
+        $params['ImageId'] = $options['imageId'];
+        $params['MinCount'] = $options['minCount'];
+        $params['MaxCount'] = $options['maxCount'];
 
-        if($keyName) {
-            $params['KeyName'] = $keyName;
+        if($options['keyName']) {
+            $params['KeyName'] = $options['keyName'];
         }
 
-        if(is_array($securityGroup) && !empty($securityGroup)) {
-            foreach($securityGroup as $k=>$name) {
+        if(is_array($options['securityGroup']) && !empty($options['securityGroup'])) {
+            foreach($options['securityGroup'] as $k=>$name) {
                 $params['SecurityGroup.' . ($k+1)] = $name;
             }
-        } elseif($securityGroup) {
-            $params['SecurityGroup.1'] = $securityGroup;
+        } elseif($options['securityGroup']) {
+            $params['SecurityGroup.1'] = $options['securityGroup'];
         }
 
-        if($userData) {
-            $params['UserData'] = base64_encode($userData);
+        if($options['userData']) {
+            $params['UserData'] = base64_encode($options['userData']);
         }
 
-        if($instanceType) {
-            $params['InstanceType'] = $instanceType;
+        if($options['instanceType']) {
+            $params['InstanceType'] = $options['instanceType'];
         }
 
-        if($placement) {
-            $params['Placement.AvailabilityZone'] = $placement;
+        if($options['placement']) {
+            $params['Placement.AvailabilityZone'] = $options['placement'];
         }
 
-        if($kernelId) {
-            $params['KernelId'] = $kernelId;
+        if($options['kernelId']) {
+            $params['KernelId'] = $options['kernelId'];
         }
 
-        if($ramdiskId) {
-            $params['RamdiskId'] = $ramdiskId;
+        if($options['ramdiskId']) {
+            $params['RamdiskId'] = $options['ramdiskId'];
         }
 
-        if($blockDeviceVirtualName && $blockDeviceName) {
-            $params['BlockDeviceMapping.n.VirtualName'] = $blockDeviceVirtualName;
-            $params['BlockDeviceMapping.n.DeviceName'] = $blockDeviceName;
+        if($options['blockDeviceVirtualName'] && $options['blockDeviceName']) {
+            $params['BlockDeviceMapping.n.VirtualName'] = $options['blockDeviceVirtualName'];
+            $params['BlockDeviceMapping.n.DeviceName'] = $options['blockDeviceName'];
         }
 
         $response = $this->sendRequest($params);

@@ -242,7 +242,21 @@ class InstanceTest extends PHPUnit_Framework_TestCase
                     . "</RunInstancesResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Instance->run('ami-60a54009', 1, 3, "example-key-name", "default", "instance_id=www3", 'm1.small', 'us-east-1b', 'aki-4438dd2d', 'ari-4538dd2c', 'vertdevice', '/dev/sdv');
+
+        $arrStart = array(
+            'imageId' => 'ami-60a54009',
+            'maxStart' => 3,
+            'keyName'   => 'example-key-name',
+            'securityGroups'    => 'default',
+            'userData'          => 'instance_id=www3',
+            'placement'         => 'us-east-1b',
+            'kernelId'          => 'aki-4438dd2d',
+            'ramdiskId'         => 'ari-4538dd2c',
+            'blockDeviceVirtualName'    => 'vertdevice',
+            'blockDeviceName'       => '/dev/sdv'
+        );
+
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->run($arrStart);
 
         $this->assertEquals(3, count($return['instances']));
         $this->assertEquals('495219933132', $return['ownerId']);
@@ -303,7 +317,19 @@ class InstanceTest extends PHPUnit_Framework_TestCase
                     . "</RunInstancesResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Instance->run('ami-60a54009', 1, 3, 'example-key-name', array('default','web'), 'instance_id=www3', 'm1.small', 'us-east-1b', 'aki-4438dd2d', 'ari-4538dd2c', 'vertdevice', '/dev/sdv');
+        $arrStart = array(
+            'imageId' => 'ami-60a54009',
+            'keyName'   => 'example-key-name',
+            'securityGroups'    => array('default','web'),
+            'userData'          => 'instance_id=www3',
+            'placement'         => 'us-east-1b',
+            'kernelId'          => 'aki-4438dd2d',
+            'ramdiskId'         => 'ari-4538dd2c',
+            'blockDeviceVirtualName'    => 'vertdevice',
+            'blockDeviceName'       => '/dev/sdv'
+        );
+
+        $return = $this->Zend_Service_Amazon_Ec2_Instance->run($arrStart);
 
         $arrGroups = array('default', 'web');
 
