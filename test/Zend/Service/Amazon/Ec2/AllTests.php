@@ -14,6 +14,8 @@ require_once 'test/Zend/Service/Amazon/Ec2/InstanceTest.php';
 
 require_once 'test/Zend/Service/Amazon/Ec2/KeypairTest.php';
 
+require_once 'test/Zend/Service/Amazon/Ec2/RegionTest.php';
+
 require_once 'test/Zend/Service/Amazon/Ec2/SecuritygroupsTest.php';
 
 /**
@@ -34,6 +36,7 @@ class AllTests extends PHPUnit_Framework_TestSuite
         $this->addTestSuite( 'ImageTest' );
         $this->addTestSuite( 'InstanceTest' );
         $this->addTestSuite( 'KeypairTest' );
+        $this->addTestSuite( 'RegionTest' );
         $this->addTestSuite( 'SecuritygroupsTest' );
     }
 
