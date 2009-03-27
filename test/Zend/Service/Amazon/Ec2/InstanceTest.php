@@ -266,7 +266,7 @@ class InstanceTest extends PHPUnit_Framework_TestCase
                     . "Server: hi\r\n"
                     . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
                     . "Status: 200 OK\r\n"
-                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\nn"
                     . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
                     . "Connection: close\r\n"
                     . "\r\n"
@@ -480,10 +480,6 @@ class InstanceTest extends PHPUnit_Framework_TestCase
 . "Built 1 zonelists\n"
 . "Kernel command line: root=/dev/sda1 ro 4\n"
 . "Enabling fast FPU save and restore... done.\n");
-
-        var_dump($arrOutput);
-
-        var_dump($return);
 
         $this->assertSame($arrOutput, $return);
     }
