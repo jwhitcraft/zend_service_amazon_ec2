@@ -76,7 +76,7 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
                     . "</AuthorizeSecurityGroupIngressResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->authorize('MyGroup', 'tcp', '80', '80', '0.0.0.0/0');
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->authorizeIp('MyGroup', 'tcp', '80', '80', '0.0.0.0/0');
         $this->assertTrue($return);
 
     }
@@ -98,7 +98,29 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
                     . "</AuthorizeSecurityGroupIngressResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->authorize('MyGroup', 'tcp', '6000', '7000', '0.0.0.0/0');
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->authorizeIp('MyGroup', 'tcp', '6000', '7000', '0.0.0.0/0');
+        $this->assertTrue($return);
+
+    }
+
+    public function testAuthorizeSecurityGroupName()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+                    . "<AuthorizeSecurityGroupIngressResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <return>true</return>\r\n"
+                    . "</AuthorizeSecurityGroupIngressResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->authorizeGroup('MyGroup', 'groupname', '15333848');
         $this->assertTrue($return);
 
     }
@@ -322,7 +344,7 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
                     . "</RevokeSecurityGroupIngressResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->revoke('MyGroup', 'tcp', '80', '80', '0.0.0.0/0');
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->revokeIp('MyGroup', 'tcp', '80', '80', '0.0.0.0/0');
         $this->assertTrue($return);
 
     }
@@ -344,7 +366,30 @@ class SecuritygroupsTest extends PHPUnit_Framework_TestCase
                     . "</RevokeSecurityGroupIngressResponse>\r\n";
         $this->adapter->setResponse($rawHttpResponse);
 
-        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->revoke('MyGroup', 'tcp', '6000', '7000', '0.0.0.0/0');
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->revokeIp('MyGroup', 'tcp', '6000', '7000', '0.0.0.0/0');
+        $this->assertTrue($return);
+
+    }
+
+
+    public function testRevokeSecurityGroupName()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+                    . "<RevokeSecurityGroupIngressResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <return>true</return>\r\n"
+                    . "</RevokeSecurityGroupIngressResponse>\r\n";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Securitygroups->revokeGroup('MyGroup', 'groupname', '15333848');
         $this->assertTrue($return);
 
     }

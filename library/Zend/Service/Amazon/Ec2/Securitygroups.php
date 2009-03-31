@@ -126,10 +126,6 @@ class Zend_Service_Amazon_Ec2_Securitygroups extends Zend_Service_Amazon_Ec2_Abs
      * Permission changes are propagated to instances within the security group as quickly as
      * possible. However, depending on the number of instances, a small delay might occur.
      *
-     * When authorizing a user/group pair permission, GroupName, SourceSecurityGroupName and
-     * SourceSecurityGroupOwnerId must be specified. When authorizing a CIDR IP permission,
-     * GroupName, IpProtocol, FromPort, ToPort and CidrIp must be specified. Mixing these
-     * two types of parameters is not allowed.
      *
      * @param string $name                  Name of the group to modify.
      * @param string $ipProtocol            IP protocol to authorize access to when operating on a CIDR IP.
@@ -140,7 +136,7 @@ class Zend_Service_Amazon_Ec2_Securitygroups extends Zend_Service_Amazon_Ec2_Abs
      * @param string $cidrIp                CIDR IP range to authorize access to when operating on a CIDR IP.
      * @return boolean
      */
-    public function authorize($name, $ipProtocol, $fromPort, $toPort, $cidrIp)
+    public function authorizeIp($name, $ipProtocol, $fromPort, $toPort, $cidrIp)
     {
         $params = array();
         $params['Action'] = 'AuthorizeSecurityGroupIngress';
@@ -159,6 +155,37 @@ class Zend_Service_Amazon_Ec2_Securitygroups extends Zend_Service_Amazon_Ec2_Abs
     }
 
     /**
+     * Adds permissions to a security group
+     *
+     * Permission changes are propagated to instances within the security group as quickly as
+     * possible. However, depending on the number of instances, a small delay might occur.
+     *
+     * When authorizing a user/group pair permission, GroupName, SourceSecurityGroupName and
+     * SourceSecurityGroupOwnerId must be specified.
+     *
+     * @param string $name                  Name of the group to modify.
+     * @param string $groupName             Name of security group to authorize access to when operating on a user/group pair.
+     * @param string $ownerId               Owner of security group to authorize access to when operating on a user/group pair.
+     * @return boolean
+     */
+    public function authorizeGroup($name, $groupName, $ownerId)
+    {
+        $params = array();
+        $params['Action'] = 'AuthorizeSecurityGroupIngress';
+        $params['GroupName'] = $name;
+        $params['SourceSecurityGroupName'] = $groupName;
+        $params['SourceSecurityGroupOwnerId'] = $ownerId;
+
+
+        $response = $this->sendRequest($params);
+        $xpath = $response->getXPath();
+        $success  = $xpath->evaluate('string(//ec2:return/text())');
+
+
+        return ($success === "true");
+    }
+
+    /**
      * Revokes permissions from a security group. The permissions used to revoke must be specified
      * using the same values used to grant the permissions.
      *
@@ -170,10 +197,6 @@ class Zend_Service_Amazon_Ec2_Securitygroups extends Zend_Service_Amazon_Ec2_Abs
      * Permission changes are propagated to instances within the security group as quickly as
      * possible. However, depending on the number of instances, a small delay might occur.
      *
-     * When revoking a user/group pair permission, GroupName, SourceSecurityGroupName and
-     * SourceSecurityGroupOwnerId must be specified. When authorizing a CIDR IP permission,
-     * GroupName, IpProtocol, FromPort, ToPort and CidrIp must be specified. Mixing these
-     * two types of parameters is not allowed.
      *
      * @param string $name                  Name of the group to modify.
      * @param string $ipProtocol            IP protocol to revoke access to when operating on a CIDR IP.
@@ -184,7 +207,7 @@ class Zend_Service_Amazon_Ec2_Securitygroups extends Zend_Service_Amazon_Ec2_Abs
      * @param string $cidrIp                CIDR IP range to revoke access to when operating on a CIDR IP.
      * @return boolean
      */
-    public function revoke($name, $ipProtocol, $fromPort, $toPort, $cidrIp)
+    public function revokeIp($name, $ipProtocol, $fromPort, $toPort, $cidrIp)
     {
         $params = array();
         $params['Action'] = 'RevokeSecurityGroupIngress';
@@ -197,6 +220,38 @@ class Zend_Service_Amazon_Ec2_Securitygroups extends Zend_Service_Amazon_Ec2_Abs
         $response = $this->sendRequest($params);
         $xpath = $response->getXPath();
         $success  = $xpath->evaluate('string(//ec2:return/text())');
+
+        return ($success === "true");
+    }
+
+    /**
+     * Revokes permissions from a security group. The permissions used to revoke must be specified
+     * using the same values used to grant the permissions.
+     *
+     * Permission changes are propagated to instances within the security group as quickly as
+     * possible. However, depending on the number of instances, a small delay might occur.
+     *
+     * When authorizing a user/group pair permission, GroupName, SourceSecurityGroupName and
+     * SourceSecurityGroupOwnerId must be specified.
+     *
+     * @param string $name                  Name of the group to modify.
+     * @param string $groupName             Name of security group to revoke access to when operating on a user/group pair.
+     * @param string $ownerId               Owner of security group to revoke access to when operating on a user/group pair.
+     * @return boolean
+     */
+    public function revokeGroup($name, $groupName, $ownerId)
+    {
+        $params = array();
+        $params['Action'] = 'RevokeSecurityGroupIngress';
+        $params['GroupName'] = $name;
+        $params['SourceSecurityGroupName'] = $groupName;
+        $params['SourceSecurityGroupOwnerId'] = $ownerId;
+
+
+        $response = $this->sendRequest($params);
+        $xpath = $response->getXPath();
+        $success  = $xpath->evaluate('string(//ec2:return/text())');
+
 
         return ($success === "true");
     }
