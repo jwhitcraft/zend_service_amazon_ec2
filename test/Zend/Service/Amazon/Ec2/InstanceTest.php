@@ -56,6 +56,15 @@ class InstanceTest extends PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
+    public function testConstants()
+    {
+        $this->assertEquals('m1.small', Zend_Service_Amazon_Ec2_Instance::SMALL);
+        $this->assertEquals('m1.large', Zend_Service_Amazon_Ec2_Instance::LARGE);
+        $this->assertEquals('m1.xlarge', Zend_Service_Amazon_Ec2_Instance::XLARGE);
+        $this->assertEquals('c1.medium', Zend_Service_Amazon_Ec2_Instance::HCPU_MEDIUM);
+        $this->assertEquals('c1.xlarge', Zend_Service_Amazon_Ec2_Instance::HCPU_XLARGE);
+    }
+
     /**
      * Tests Zend_Service_Amazon_Ec2_Instance->confirmProduct()
      */
