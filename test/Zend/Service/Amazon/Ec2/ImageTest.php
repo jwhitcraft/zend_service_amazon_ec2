@@ -44,9 +44,6 @@ class ImageTest extends PHPUnit_Framework_TestCase
         Zend_Service_Amazon_Ec2_Image::setHttpClient($client);
     }
 
-    /**
-     * Cleans up the environment after running a test.
-     */
     protected function tearDown()
     {
         $this->Zend_Service_Amazon_Ec2_Image = null;
@@ -54,9 +51,6 @@ class ImageTest extends PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Image->deregister()
-     */
     public function testDeregister()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -79,10 +73,78 @@ class ImageTest extends PHPUnit_Framework_TestCase
 
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Image->describe()
-     */
-    public function testDescribe()
+    public function testDescribeSingleImageMultipleImagesByIds()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeImagesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <imagesSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd7</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>206029621532</imageOwnerId>\r\n"
+                    . "      <isPublic>false</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd6</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/ubuntu-8.10-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>206029621532</imageOwnerId>\r\n"
+                    . "      <isPublic>true</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </imagesSet>\r\n"
+                    . "</DescribeImagesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Image->describe(array('ami-be3adfd7', 'ami-be3adfd6'));
+
+        $arrImage = array(
+            array(
+                'imageId'   => 'ami-be3adfd7',
+                'imageLocation'   => 'ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'false',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            ),
+            array(
+                'imageId'   => 'ami-be3adfd6',
+                'imageLocation'   => 'ec2-public-images/ubuntu-8.10-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'true',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            )
+        );
+
+        $this->assertSame($arrImage, $return);
+    }
+
+    public function testDescribeSingleImageById()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
                     . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
@@ -112,14 +174,262 @@ class ImageTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Image->describe('ami-be3adfd7');
 
-        $this->assertEquals('ami-be3adfd7', $return[0]['imageId']);
-        $this->assertEquals('ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml', $return[0]['imageLocation']);
+        $arrImage = array(
+            array(
+                'imageId'   => 'ami-be3adfd7',
+                'imageLocation'   => 'ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'false',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            )
+        );
 
+        $this->assertSame($arrImage, $return);
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Image->describeAttribute()
-     */
+    public function testDescribeSingleImageMultipleImagesByOwnerId()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeImagesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <imagesSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd7</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>2060296256884</imageOwnerId>\r\n"
+                    . "      <isPublic>false</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd6</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/ubuntu-8.10-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>206029621532</imageOwnerId>\r\n"
+                    . "      <isPublic>true</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </imagesSet>\r\n"
+                    . "</DescribeImagesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Image->describe(null, array('2060296256884', '206029621532'));
+
+        $arrImage = array(
+            array(
+                'imageId'   => 'ami-be3adfd7',
+                'imageLocation'   => 'ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '2060296256884',
+                'isPublic'   => 'false',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            ),
+            array(
+                'imageId'   => 'ami-be3adfd6',
+                'imageLocation'   => 'ec2-public-images/ubuntu-8.10-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'true',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            )
+        );
+
+        $this->assertSame($arrImage, $return);
+    }
+
+    public function testDescribeSingleImageByOwnerId()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeImagesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <imagesSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd7</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>206029621532</imageOwnerId>\r\n"
+                    . "      <isPublic>false</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </imagesSet>\r\n"
+                    . "</DescribeImagesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Image->describe(null, '206029621532');
+
+        $arrImage = array(
+            array(
+                'imageId'   => 'ami-be3adfd7',
+                'imageLocation'   => 'ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'false',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            )
+        );
+
+        $this->assertSame($arrImage, $return);
+    }
+
+    public function testDescribeSingleImageMultipleImagesByExecutableBy()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeImagesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <imagesSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd7</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>2060296256884</imageOwnerId>\r\n"
+                    . "      <isPublic>false</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd6</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/ubuntu-8.10-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>206029621532</imageOwnerId>\r\n"
+                    . "      <isPublic>true</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </imagesSet>\r\n"
+                    . "</DescribeImagesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Image->describe(null, null, array('46361432890', '432432265322'));
+
+        $arrImage = array(
+            array(
+                'imageId'   => 'ami-be3adfd7',
+                'imageLocation'   => 'ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '2060296256884',
+                'isPublic'   => 'false',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            ),
+            array(
+                'imageId'   => 'ami-be3adfd6',
+                'imageLocation'   => 'ec2-public-images/ubuntu-8.10-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'true',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            )
+        );
+
+        $this->assertSame($arrImage, $return);
+    }
+
+    public function testDescribeSingleImageByExecutableBy()
+    {
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeImagesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "  <imagesSet>\r\n"
+                    . "    <item>\r\n"
+                    . "      <imageId>ami-be3adfd7</imageId>\r\n"
+                    . "      <imageLocation>ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml</imageLocation>\r\n"
+                    . "      <imageState>available</imageState>\r\n"
+                    . "      <imageOwnerId>206029621532</imageOwnerId>\r\n"
+                    . "      <isPublic>false</isPublic>\r\n"
+                    . "      <architecture>i386</architecture>\r\n"
+                    . "      <imageType>machine</imageType>\r\n"
+                    . "      <kernelId>aki-4438dd2d</kernelId>\r\n"
+                    . "      <ramdiskId>ari-4538dd2c</ramdiskId>\r\n"
+                    . "    </item>\r\n"
+                    . "  </imagesSet>\r\n"
+                    . "</DescribeImagesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Image->describe(null, null, '46361432890');
+
+        $arrImage = array(
+            array(
+                'imageId'   => 'ami-be3adfd7',
+                'imageLocation'   => 'ec2-public-images/fedora-8-i386-base-v1.04.manifest.xml',
+                'imageState'   => 'available',
+                'imageOwnerId'   => '206029621532',
+                'isPublic'   => 'false',
+                'architecture'   => 'i386',
+                'imageType'   => 'machine',
+                'kernelId'   => 'aki-4438dd2d',
+                'ramdiskId'   => 'ari-4538dd2c',
+                'platform'   => '',
+            )
+        );
+
+        $this->assertSame($arrImage, $return);
+    }
+
     public function testDescribeAttributeLaunchPermission()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -174,9 +484,6 @@ class ImageTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('774F4FF8', $return['productCodes'][0]);
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Image->modifyAttribute()
-     */
     public function testModifyAttributeSingleLaunchPermission()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -247,9 +554,6 @@ class ImageTest extends PHPUnit_Framework_TestCase
 
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Image->register()
-     */
     public function testRegister()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -272,9 +576,6 @@ class ImageTest extends PHPUnit_Framework_TestCase
 
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Image->resetAttribute()
-     */
     public function testResetAttribute()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"

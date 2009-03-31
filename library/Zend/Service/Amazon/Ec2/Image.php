@@ -111,11 +111,13 @@ class Zend_Service_Amazon_Ec2_Image extends Zend_Service_Amazon_Ec2_Abstract
             $item['imageId']        = $xpath->evaluate('string(ec2:imageId/text())', $node);
             $item['imageLocation']  = $xpath->evaluate('string(ec2:imageLocation/text())', $node);
             $item['imageState']     = $xpath->evaluate('string(ec2:imageState/text())', $node);
+            $item['imageOwnerId']   = $xpath->evaluate('string(ec2:imageOwnerId/text())', $node);
             $item['isPublic']       = $xpath->evaluate('string(ec2:isPublic/text())', $node);
             $item['architecture']   = $xpath->evaluate('string(ec2:architecture/text())', $node);
             $item['imageType']      = $xpath->evaluate('string(ec2:imageType/text())', $node);
-            $item['kernelid']       = $xpath->evaluate('string(ec2:kernelid/text())', $node);
+            $item['kernelId']       = $xpath->evaluate('string(ec2:kernelId/text())', $node);
             $item['ramdiskId']      = $xpath->evaluate('string(ec2:ramdiskId/text())', $node);
+            $item['platform']       = $xpath->evaluate('string(ec2:platform/text())', $node);
 
             $return[] = $item;
             unset($item, $node);

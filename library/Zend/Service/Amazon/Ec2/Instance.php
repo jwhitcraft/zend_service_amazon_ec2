@@ -84,7 +84,7 @@ class Zend_Service_Amazon_Ec2_Instance extends Zend_Service_Amazon_Ec2_Abstract
 
         if(!$options['imageId']) {
             require_once 'Zend/Service/Amazon/Ec2/Exception.php';
-            throw new Zend_Service_Amazon_Ec2_Exception('No Image Id Privided');
+            throw new Zend_Service_Amazon_Ec2_Exception('No Image Id Provided');
         }
 
 

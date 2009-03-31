@@ -173,9 +173,28 @@ class InstanceTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('us-east-1b', $return['instances'][0]['availabilityZone']);
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Instance->run()
-     */
+    public function testRunThrowsExceptionWhenNoImageIdPassedIn()
+    {
+        $arrStart = array(
+            'maxStart' => 3,
+            'keyName'   => 'example-key-name',
+            'securityGroup'    => 'default',
+            'userData'          => 'instance_id=www3',
+            'placement'         => 'us-east-1b',
+            'kernelId'          => 'aki-4438dd2d',
+            'ramdiskId'         => 'ari-4538dd2c',
+            'blockDeviceVirtualName'    => 'vertdevice',
+            'blockDeviceName'       => '/dev/sdv'
+        );
+
+        try {
+            $return = $this->Zend_Service_Amazon_Ec2_Instance->run($arrStart);
+            $this->fail('Exception should be thrown when no image id is passed into the run commmand');
+        } catch (Zend_Service_Amazon_Ec2_Exception $zsaee) {
+            $this->assertEquals('No Image Id Provided', $zsaee->getMessage());
+        }
+    }
+
     public function testRunOneSecurityGroup()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -256,7 +275,7 @@ class InstanceTest extends PHPUnit_Framework_TestCase
             'imageId' => 'ami-60a54009',
             'maxStart' => 3,
             'keyName'   => 'example-key-name',
-            'securityGroups'    => 'default',
+            'securityGroup'    => 'default',
             'userData'          => 'instance_id=www3',
             'placement'         => 'us-east-1b',
             'kernelId'          => 'aki-4438dd2d',
@@ -279,9 +298,6 @@ class InstanceTest extends PHPUnit_Framework_TestCase
 
     }
 
-/**
-     * Tests Zend_Service_Amazon_Ec2_Instance->run()
-     */
     public function testRunMultipleSecurityGroups()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -329,7 +345,7 @@ class InstanceTest extends PHPUnit_Framework_TestCase
         $arrStart = array(
             'imageId' => 'ami-60a54009',
             'keyName'   => 'example-key-name',
-            'securityGroups'    => array('default','web'),
+            'securityGroup'    => array('default','web'),
             'userData'          => 'instance_id=www3',
             'placement'         => 'us-east-1b',
             'kernelId'          => 'aki-4438dd2d',
