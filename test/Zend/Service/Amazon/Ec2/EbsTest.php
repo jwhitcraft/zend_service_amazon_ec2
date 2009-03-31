@@ -53,9 +53,6 @@ class EbsTest extends PHPUnit_Framework_TestCase
         parent::tearDown();
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Ebs->attachVolume()
-     */
     public function testAttachVolume()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -78,14 +75,17 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->attachVolume('vol-4d826724', 'i-6058a509', '/dev/sdh');
 
-        $this->assertEquals('vol-4d826724', $return['volumeId']);
-        $this->assertEquals('i-6058a509', $return['instanceId']);
-        $this->assertEquals('/dev/sdh', $return['device']);
+        $arrAttach = array(
+            'volumeId'  => 'vol-4d826724',
+            'instanceId'  => 'i-6058a509',
+            'device'  => '/dev/sdh',
+            'status'  => 'attaching',
+            'attachTime'  => '2008-05-07T11:51:50.000Z'
+        );
+
+        $this->assertSame($arrAttach, $return);
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Ebs->createSnapshot()
-     */
     public function testCreateSnapshot()
     {
 
@@ -109,14 +109,18 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->createSnapshot('vol-4d826724');
 
-        $this->assertEquals('vol-4d826724', $return['volumeId']);
-        $this->assertEquals('snap-78a54011', $return['snapshotId']);
+        $arrCreateSnapShot = array(
+            'snapshotId'  => 'snap-78a54011',
+            'volumeId'  => 'vol-4d826724',
+            'status'  => 'pending',
+            'startTime'  => '2008-05-07T11:51:50.000Z',
+            'progress'  => ''
+        );
+
+        $this->assertSame($arrCreateSnapShot, $return);
 
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Ebs->createVolume()
-     */
     public function testCreateNewVolume()
     {
         $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
@@ -140,9 +144,16 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->createNewVolume(400, 'us-east-1a');
 
-        $this->assertEquals('400', $return['size']);
-        $this->assertEquals('vol-4d826724', $return['volumeId']);
-        $this->assertEquals('us-east-1a', $return['availabilityZone']);
+        $arrCreateNewVolume = array(
+            'volumeId'  => 'vol-4d826724',
+            'size'  => '400',
+            'status'  => 'creating',
+            'createTime'  => '2008-05-07T11:51:50.000Z',
+            'availabilityZone'  => 'us-east-1a',
+            'snapshotId'        => ''
+        );
+
+        $this->assertSame($arrCreateNewVolume, $return);
 
     }
 
@@ -169,16 +180,19 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->createVolumeFromSnapshot('snap-78a54011', 'us-east-1a');
 
-        $this->assertEquals('400', $return['size']);
-        $this->assertEquals('vol-4d826724', $return['volumeId']);
-        $this->assertEquals('us-east-1a', $return['availabilityZone']);
-        $this->assertEquals('snap-78a54011', $return['snapshotId']);
+        $arrCreateNewVolume = array(
+            'volumeId'  => 'vol-4d826724',
+            'size'  => '400',
+            'status'  => 'creating',
+            'createTime'  => '2008-05-07T11:51:50.000Z',
+            'availabilityZone'  => 'us-east-1a',
+            'snapshotId'        => 'snap-78a54011'
+        );
+
+        $this->assertSame($arrCreateNewVolume, $return);
 
     }
 
-    /**
-     * Tests Zend_Service_Amazon_Ec2_Ebs->deleteSnapshot()
-     */
     public function testDeleteSnapshot()
     {
 
@@ -198,7 +212,6 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->deleteSnapshot('snap-78a54011');
 
-        $this->assertType('boolean', $return);
         $this->assertTrue($return);
 
     }
@@ -221,7 +234,6 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->deleteVolume('vol-4d826724');
 
-        $this->assertType('boolean', $return);
         $this->assertTrue($return);
     }
 
@@ -254,8 +266,17 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->describeSnapshot('snap-78a54011');
 
-        $this->assertEquals('snap-78a54011', $return[0]['snapshotId']);
-        $this->assertEquals('vol-4d826724', $return[0]['volumeId']);
+        $arrSnapshot = array(array(
+            'snapshotId'        => 'snap-78a54011',
+            'volumeId'  => 'vol-4d826724',
+            'status'  => 'pending',
+            'startTime'  => '2008-05-07T12:51:50.000Z',
+            'progress'  => '80%'
+        ));
+
+        $this->assertSame($arrSnapshot, $return);
+
+
     }
 
     public function testDescribeMultipleSnapshots()
@@ -308,9 +329,7 @@ class EbsTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        foreach($return as $k => $r) {
-            $this->assertSame($arrSnapshots[$k], $r);
-        }
+        $this->assertSame($arrSnapshots, $return);
 
     }
 
@@ -340,7 +359,7 @@ class EbsTest extends PHPUnit_Framework_TestCase
                     . "      <item>\r\n"
                     . "        <volumeId>vol-4282672b</volumeId>\r\n"
                     . "        <instanceId>i-6058a509</instanceId>\r\n"
-                    . "        <size>800</size>\r\n"
+                    . "        <device>/dev/sdh</device>\r\n"
                     . "        <snapshotId>snap-12345678</snapshotId>\r\n"
                     . "        <availabilityZone>us-east-1a</availabilityZone>\r\n"
                     . "        <status>attached</status>\r\n"
@@ -354,9 +373,23 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->describeVolume('vol-4282672b');
 
-        $this->assertEquals('vol-4282672b', $return[0]['volumeId']);
-        $this->assertEquals('in-use', $return[0]['status']);
-        $this->assertType('array', $return[0]['attachmentSet']);
+        $arrVolumes = array(
+            array(
+                'volumeId'          => 'vol-4282672b',
+                'size'              => '800',
+                'status'            => 'in-use',
+                'createTime'        => '2008-05-07T11:51:50.000Z',
+                'attachmentSet'     => array(
+                    'volumeId'              => 'vol-4282672b',
+                    'instanceId'            => 'i-6058a509',
+                    'device'                => '/dev/sdh',
+                    'status'                => 'attached',
+                    'attachTime'            => '2008-05-07T12:51:50.000Z',
+                )
+            )
+        );
+
+        $this->assertSame($arrVolumes, $return);
 
     }
 
@@ -421,14 +454,73 @@ class EbsTest extends PHPUnit_Framework_TestCase
                 'volumeId'          => 'vol-42826775',
                 'size'              => '40',
                 'status'            => 'available',
-                'createTime'        => '2008-08-07T11:51:50.000Z',
-                'attachmentSet'     => null
+                'createTime'        => '2008-08-07T11:51:50.000Z'
             )
         );
 
-        foreach($return as $k => $r) {
-            $this->assertSame($arrVolumes[$k], $r);
-        }
+        $this->assertSame($arrVolumes, $return);
+    }
+
+    public function testDescribeAttachedVolumes()
+    {
+
+        $rawHttpResponse = "HTTP/1.1 200 OK\r\n"
+                    . "Date: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Server: hi\r\n"
+                    . "Last-modified: Fri, 24 Oct 2008 17:24:52 GMT\r\n"
+                    . "Status: 200 OK\r\n"
+                    . "Content-type: application/xml; charset=utf-8\r\n"
+                    . "Expires: Tue, 31 Mar 1981 05:00:00 GMT\r\n"
+                    . "Connection: close\r\n"
+                    . "\r\n"
+                    . "<DescribeVolumesResponse xmlns=\"http://ec2.amazonaws.com/doc/2008-12-01/\">\r\n"
+                    . "<volumeSet>\r\n"
+                    . "  <item>\r\n"
+                    . "    <volumeId>vol-4282672b</volumeId>\r\n"
+                    . "    <size>800</size>\r\n"
+                    . "    <status>in-use</status>\r\n"
+                    . "    <createTime>2008-05-07T11:51:50.000Z</createTime>\r\n"
+                    . "    <attachmentSet>\r\n"
+                    . "      <item>\r\n"
+                    . "        <volumeId>vol-4282672b</volumeId>\r\n"
+                    . "        <instanceId>i-6058a509</instanceId>\r\n"
+                    . "        <device>/dev/sdh</device>\r\n"
+                    . "        <snapshotId>snap-12345678</snapshotId>\r\n"
+                    . "        <availabilityZone>us-east-1a</availabilityZone>\r\n"
+                    . "        <status>attached</status>\r\n"
+                    . "        <attachTime>2008-05-07T12:51:50.000Z</attachTime>\r\n"
+                    . "      </item>\r\n"
+                    . "    </attachmentSet>\r\n"
+                    . "  </item>\r\n"
+                    . "  <item>\r\n"
+                    . "    <volumeId>vol-42826775</volumeId>\r\n"
+                    . "    <size>40</size>\r\n"
+                    . "    <status>available</status>\r\n"
+                    . "    <createTime>2008-08-07T11:51:50.000Z</createTime>\r\n"
+                    . "  </item>\r\n"
+                    . "</volumeSet>\r\n"
+                    . "</DescribeVolumesResponse>";
+        $this->adapter->setResponse($rawHttpResponse);
+
+        $return = $this->Zend_Service_Amazon_Ec2_Ebs->describeAttachedVolumes('i-6058a509');
+
+        $arrVolumes = array(
+            array(
+                'volumeId'          => 'vol-4282672b',
+                'size'              => '800',
+                'status'            => 'in-use',
+                'createTime'        => '2008-05-07T11:51:50.000Z',
+                'attachmentSet'     => array(
+                    'volumeId'              => 'vol-4282672b',
+                    'instanceId'            => 'i-6058a509',
+                    'device'                => '/dev/sdh',
+                    'status'                => 'attached',
+                    'attachTime'            => '2008-05-07T12:51:50.000Z',
+                )
+            )
+        );
+
+        $this->assertSame($arrVolumes, $return);
     }
 
     /**
@@ -456,9 +548,15 @@ class EbsTest extends PHPUnit_Framework_TestCase
 
         $return = $this->Zend_Service_Amazon_Ec2_Ebs->detachVolume('vol-4d826724');
 
-        $this->assertEquals('vol-4d826724', $return['volumeId']);
-        $this->assertEquals('detaching', $return['status']);
+        $arrVolume = array(
+            'volumeId'      => 'vol-4d826724',
+            'instanceId'    => 'i-6058a509',
+            'device'        => '/dev/sdh',
+            'status'        => 'detaching',
+            'attachTime'    => '2008-05-08T11:51:50.000Z'
+        );
 
+        $this->assertSame($arrVolume, $return);
     }
 
 }

@@ -101,19 +101,33 @@ class Zend_Service_Amazon_Ec2_Ebs extends Zend_Service_Amazon_Ec2_Abstract
             $item['createTime'] = $xpath->evaluate('string(ec2:createTime/text())', $node);
 
             $attachmentSet = $xpath->query('ec2:attachmentSet/ec2:item', $node);
-            $as = null;
-            foreach($attachmentSet as $_as) {
+            if($attachmentSet->length == 1) {
+                $_as = $attachmentSet->item(0);
                 $as = array();
                 $as['volumeId'] = $xpath->evaluate('string(ec2:volumeId/text())', $_as);
                 $as['instanceId'] = $xpath->evaluate('string(ec2:instanceId/text())', $_as);
                 $as['device'] = $xpath->evaluate('string(ec2:device/text())', $_as);
                 $as['status'] = $xpath->evaluate('string(ec2:status/text())', $_as);
                 $as['attachTime'] = $xpath->evaluate('string(ec2:attachTime/text())', $_as);
+                $item['attachmentSet'] = $as;
             }
-            $item['attachmentSet'] = $as;
 
             $return[] = $item;
             unset($item, $node);
+        }
+
+        return $return;
+    }
+
+    public function describeAttachedVolumes($instanceId)
+    {
+        $volumes = $this->describeVolume();
+
+        $return = array();
+        foreach($volumes as $vol) {
+            if(isset($vol['attachmentSet']) && $vol['attachmentSet']['instanceId'] == $instanceId) {
+                $return[] = $vol;
+            }
         }
 
         return $return;
